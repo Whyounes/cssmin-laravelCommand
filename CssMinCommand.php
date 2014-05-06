@@ -28,36 +28,44 @@ class CssminCommand extends Command{
     }
 
     public function fire(){
-
         $this->init();
 
         $this->processFiles();
-
     }
 
     private function processFiles(){
         $css_result = [];
 
         foreach ( $this->files as $file ) {
+            $this->comment("'{$file}'");
+
+            $this->info("Loading file");            
             //read file content
             $file_content = file_get_contents( $file );
+
+            $this->info("minifying");
             //minify CSS and add it to the result array
             $css_result[] = $this->minify( $file_content, $this->comments );
         }//foreach
 
         if( $this->concat ){
+            $this->comment("Concatenating into one file");
+
             $css_concat = implode( PHP_EOL, $css_result );
+
+            $this->info("Saving to '{$this->output_path}/all.min.css'");
             file_put_contents($this->output_path . '/all.min.css', $css_concat);
         }//if
         else{
             foreach ($css_result as $key => $css) {
                 //remove '.css' to add '.min.css'
                 $filename = basename( $this->files[$key], '.css' ) . '.min.css';
-                
+
+                $this->comment("Saving '{$filename}'");
                 file_put_contents($this->output_path . '/' . $filename, $css);
             }//for
         }//else
-
+        
     }//processFiles
 
     private function minify( $css, $comments ){
